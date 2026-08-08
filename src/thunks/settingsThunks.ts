@@ -195,3 +195,69 @@ export const fetchModeInverseSetting =
       dispatch(setModeType(0));
     }
   };
+
+export const saveGameSettingsAndLaunch =
+  (serverAddress?: string): AppThunk =>
+  async (_, state) => {
+    try {
+      const userName = state().settings.userName || 'Player';
+      const fpsLimit = state().settings.fpsLimit ?? 60;
+      const pageSize = state().settings.pageSize ?? 6;
+      const graphic = state().settings.graphic ?? 0;
+      const fpscounter = state().settings.fpscounter ?? 0;
+      const androidKeyboard = state().settings.androidKeyboard ?? 0;
+
+      const addr = serverAddress || '45.146.6.6:7816';
+      const parts = addr.split(':');
+      const host = parts[0] || '45.146.6.6';
+      const port = parts[1] ? parseInt(parts[1], 10) : 7816;
+
+      const baseDir = FilePath.getPathDirCache();
+      const sampDir = `${baseDir}/SAMP`;
+      const iniPath = `${sampDir}/settings.ini`;
+
+      if (!(await RNFS.exists(baseDir))) {
+        await RNFS.mkdir(baseDir);
+      }
+      if (!(await RNFS.exists(sampDir))) {
+        await RNFS.mkdir(sampDir);
+      }
+
+      let existing: any = {};
+      try {
+        if (await RNFS.exists(iniPath)) {
+          const content = await RNFS.readFile(iniPath, 'utf8');
+          existing = parseINIString(content) || {};
+        }
+      } catch (e) {}
+
+      const newSettings = {
+        ...existing,
+        client: {
+          ...(existing.client || {}),
+          name: userName,
+          host: host,
+          port: port,
+          password: '',
+        },
+        gui: {
+          ...(existing.gui || {}),
+          fps: fpsLimit,
+          ChatMaxMessages: pageSize,
+          graphic: graphic,
+          fpscounter: fpscounter,
+          androidKeyboard: androidKeyboard,
+        },
+        server: {
+          ...(existing.server || {}),
+          host: host,
+          port: port,
+        },
+      };
+
+      await RNFS.writeFile(iniPath, stringifyIni(newSettings), 'utf8');
+    } catch (err) {
+      console.warn('Error saving settings.ini:', err);
+    }
+  };
+

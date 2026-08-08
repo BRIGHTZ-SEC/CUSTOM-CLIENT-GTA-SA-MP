@@ -21,11 +21,20 @@ public class MainGTA extends WarMedia {
             vmVersion = System.getProperty("java.vm.version");
             System.out.println("vmVersion " + vmVersion);
             System.loadLibrary("ImmEmulatorJ");
-        } catch (ExceptionInInitializerError | UnsatisfiedLinkError ignored) {
+        } catch (Throwable ignored) {
         }
 
-        System.loadLibrary("GTASA");
-        System.loadLibrary("samp");
+        try {
+            System.loadLibrary("GTASA");
+        } catch (Throwable t) {
+            System.err.println("Failed to load libGTASA.so: " + t.getMessage());
+        }
+
+        try {
+            System.loadLibrary("samp");
+        } catch (Throwable t) {
+            System.err.println("Failed to load libsamp.so: " + t.getMessage());
+        }
     }
 
     public boolean ServiceAppCommand(String str, String str2) {

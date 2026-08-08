@@ -4,10 +4,16 @@ import { CacheType } from '../actions/loaderActions';
 
 export const DistributionService = {
   async get() {
-    const response = await axios
-      .get<DistributionResponseType>(URL_DISTRIBUTION)
-      .then(res => res.data);
-    return response;
+    try {
+      const response = await axios
+        .get<DistributionResponseType>(URL_DISTRIBUTION, { timeout: 5000 })
+        .then(res => res.data);
+      return response;
+    } catch (err) {
+      console.warn('Fetching remote distribution failed, using bundled distribution asset:', err);
+      const localDistribution = require('../assets/distribution.json');
+      return localDistribution as DistributionResponseType;
+    }
   },
 };
 

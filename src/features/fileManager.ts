@@ -9,14 +9,18 @@ export const FileDownload = {
 
     await FilePath.createPathCache(toPatch, toFile);
 
+    const targetFile = toFile ? `${toPatch}/${toFile}/${toName}` : `${toPatch}/${toName}`;
+    const cleanUrl = fromUrl.replace(/([^:]\/)\/+/g, '$1');
+
     return RNFS.downloadFile({
-      fromUrl,
-      toFile: `${toPatch}/${toFile}/${toName}`,
+      fromUrl: cleanUrl,
+      toFile: targetFile,
       progress: progress,
       progressInterval: 800,
     }).promise;
   },
 };
+
 
 export const FilePath = {
   getPathDirCache: () => {
@@ -99,8 +103,9 @@ export const FileValidate = {
 
     try {
       const toPatch = FilePath.getPathDirCache();
+      const statPath = path ? `${toPatch}/${path}/${name}` : `${toPatch}/${name}`;
 
-      const { size } = await RNFS.stat(`${toPatch}/${path}/${name}`);
+      const { size } = await RNFS.stat(statPath);
       if (bytes === size || (filesContinue && filesContinue.includes(name))) {
         return 'success';
       }

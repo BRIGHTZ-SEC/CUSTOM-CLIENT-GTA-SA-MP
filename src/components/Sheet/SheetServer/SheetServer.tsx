@@ -17,6 +17,7 @@ import { Event } from '../../Event/Event';
 import DetachedContent from '../../Provider/Detached/DetachedContent';
 import * as Anims from './../../../assets/anims';
 import GtaSetupModule from './../../../modules/GtaSetupModule';
+import { saveGameSettingsAndLaunch } from '../../../thunks/settingsThunks';
 import { styles } from './SheetServerStyle';
 
 type SheetServerProps = {
@@ -44,11 +45,12 @@ export const SheetServerComponent = React.memo(
       if (userName.length < 1) {
         dispatch(setAlertUserName(true));
       } else {
+        await dispatch(saveGameSettingsAndLaunch(server?.address));
         await GtaSetupModule.startGame();
       }
 
       dismissAll();
-    }, [userName]);
+    }, [userName, server?.address, dispatch, dismissAll]);
 
     return (
       <DetachedContent

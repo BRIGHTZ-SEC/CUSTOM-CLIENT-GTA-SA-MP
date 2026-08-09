@@ -122,7 +122,7 @@ export const fetchStartDownload = (): AppThunk => async (dispatch, state) => {
         }),
       );
 
-      const res = await FileDownload.download({
+      let res = await FileDownload.download({
         fromUrl: `${urlValid}/${toFile}/${toName}`,
         toFile,
         toName,
@@ -137,6 +137,24 @@ export const fetchStartDownload = (): AppThunk => async (dispatch, state) => {
           );
         },
       });
+
+      if (res.statusCode !== 200 && urlValid !== cdnCache + '_snow') {
+        res = await FileDownload.download({
+          fromUrl: `${cdnCache}_snow/${toFile}/${toName}`,
+          toFile,
+          toName,
+          progress: ({ bytesWritten }: DownloadProgressType) => {
+            dispatch(
+              setDownloadLoader({
+                download: {
+                  currentBytes: bytesWritten,
+                  downloadBytes: downloadBytes + bytesWritten,
+                },
+              }),
+            );
+          },
+        });
+      }
 
       if (res.statusCode === 200) {
         numberOfDownloads++;

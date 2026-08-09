@@ -25,6 +25,18 @@ public class MainGTA extends WarMedia {
         }
 
         try {
+            System.loadLibrary("bass");
+        } catch (Throwable t) {
+            System.err.println("Failed to load libbass.so: " + t.getMessage());
+        }
+
+        try {
+            System.loadLibrary("SCAnd");
+        } catch (Throwable t) {
+            System.err.println("Failed to load libSCAnd.so: " + t.getMessage());
+        }
+
+        try {
             System.loadLibrary("GTASA");
         } catch (Throwable t) {
             System.err.println("Failed to load libGTASA.so: " + t.getMessage());

@@ -106,8 +106,8 @@ export const fetchStartDownload = (): AppThunk => async (dispatch, state) => {
   for await (const cache of needDownload) {
     const { id, path: toFile, name: toName, bytes } = cache;
     const bytesValid = bytes.length > 1 ? bytes[modeType] : bytes[0];
-    const urlValid =
-      bytes.length > 1 && modeType > 0 ? cdnCache + '_snow' : cdnCache;
+    const baseUrl = modeType > 0 ? (cdnCache.endsWith('_snow') ? cdnCache : cdnCache + '_snow') : cdnCache;
+    const urlValid = baseUrl;
 
     try {
       dispatch(
@@ -138,9 +138,10 @@ export const fetchStartDownload = (): AppThunk => async (dispatch, state) => {
         },
       });
 
-      if (res.statusCode !== 200 && urlValid !== cdnCache + '_snow') {
+      if (res.statusCode !== 200) {
+        const fallbackUrl = cdnCache.endsWith('_snow') ? cdnCache : `${cdnCache}_snow`;
         res = await FileDownload.download({
-          fromUrl: `${cdnCache}_snow/${toFile}/${toName}`,
+          fromUrl: `${fallbackUrl}/${toFile}/${toName}`,
           toFile,
           toName,
           progress: ({ bytesWritten }: DownloadProgressType) => {
@@ -154,6 +155,12 @@ export const fetchStartDownload = (): AppThunk => async (dispatch, state) => {
             );
           },
         });
+      }
+
+      if (res.statusCode !== 200) {
+        console.warn(`[DOWNLOAD FAIL] Could not download ${toName}, status: ${res.statusCode}`);
+        dispatch(onUploadTaskEventLoader({ status: 'complete' }));
+        return navigationRef.current?.dispatch(StackActions.replace('Error'));
       }
 
       if (res.statusCode === 200) {

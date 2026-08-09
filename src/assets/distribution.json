@@ -2209,9 +2209,9 @@
   "cacheMode": [],
   "projectName": "Touch Mobile Dark",
   "packageName": "com.touch.mobile.dark",
-  "versionHash": "ulp7ks",
+  "versionHash": "c7o4za",
   "rss": "http://77.221.56.11/launcher/news.json",
-  "cdnCache": "http://77.221.56.11/cache",
+  "cdnCache": "http://77.221.56.11/cache_snow",
   "cdnLauncher": "http://77.221.56.11/launcher",
   "filesContinue": [
     "settings.ini",
